@@ -1,5 +1,5 @@
-import enums
-from models import abstract_model
+from src import enums
+from src.models import abstract_model
 
 import time
 import random
@@ -9,6 +9,10 @@ class Experiment:
     def __init__(self, model_choice : enums.Model, languages : set[enums.LanguageCode], do_sample : bool = False, temprature : int = 0,
                  system_promp : str = "", prefix : str = "", suffix : str = "", title : str = ""):
         self._model : abstract_model.AbstractModel = model_choice.to_model()
+        self.title = title
+        self.languages = languages
+        self.do_sample = do_sample
+        self.temprature = temprature
 
     def run(self):
         """

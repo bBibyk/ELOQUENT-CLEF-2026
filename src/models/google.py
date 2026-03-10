@@ -1,4 +1,4 @@
-from abstract_model import AbstractModel
+from src.models.abstract_model import AbstractModel
 
 class Gemini20Flash(AbstractModel):
     def __init__(self):

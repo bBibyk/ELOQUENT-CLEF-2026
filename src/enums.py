@@ -1,6 +1,6 @@
 from enum import Enum
 from typing import List
-from models import (abstract_model,
+from src.models import (abstract_model,
                     mistral_ai,
                     google,
                     )
