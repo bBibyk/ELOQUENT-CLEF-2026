@@ -6,16 +6,14 @@ import random
 import string
 
 class Experiment:
-    def __init__(self, model_choice : enums.Model, languages : set[enums.LanguageCode], do_sample : bool = False, temprature : int = 0,
-                 system_promp : str = "", prefix : str = "", suffix : str = "", title : str = ""):
-        self._model : abstract_model.AbstractModel = model_choice.to_model()
-        self.title = title
+    def __init__(self, model_choice : enums.Model, languages : set[enums.LanguageCode], specific : bool = False,
+                 do_sample : bool = False, temprature : int = 0, system_prompt : str = "",
+                 prefix : str = "", suffix : str = "", experiment_title : str = ""):
         self.languages = languages
-        self.do_sample = do_sample
-        self.temprature = temprature
-        self.system_promp = system_promp
-        self.prefix = prefix
-        self.suffix = suffix
+        self.specific = specific
+        self.experiment_title = experiment_title        
+        self._model : abstract_model.AbstractModel = model_choice.to_model_class()(system_prompt=system_prompt, do_sample=do_sample, prefix=prefix, suffix=suffix, temperature=temprature)
+        
 
     def run(self):
         """
