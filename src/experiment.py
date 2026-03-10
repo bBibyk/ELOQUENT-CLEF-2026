@@ -21,7 +21,7 @@ class Experiment:
         """
         for i in range(1, 11):
             random_str = ''.join(random.choices(string.ascii_letters + string.digits, k=8))
-            result = f"Pass {i}/10 - Modèle: {self.title} - Data: {random_str}"
+            result = f"Pass {i}/10 - Modèle: {self.experiment_title} - Data: {random_str}"
             yield result
             time.sleep(1)
 
