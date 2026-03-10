@@ -1,5 +1,9 @@
 from enum import Enum
 from typing import List
+from models import (abstract_model,
+                    mistral_ai,
+                    google,
+                    )
 
 class BaseEnum(Enum):
     def __str__(self) -> str:
@@ -40,5 +44,11 @@ class LanguageCode(BaseEnum):
     TELUGU = "te"
 
 class Model(BaseEnum):
-    MISTRAL_AI = "mistralAI"
-    GROQ = "groq"
+    GEMINI_2_0_FLASH = "Gemini 2.0 Flash"
+    MISTRAL_NEMO = "Mistral NeMo"
+
+    def to_model(self) -> abstract_model.AbstractModel:
+        if self.name==self.MISTRAL_NEMO:
+            return mistral_ai.MistralNeMo()
+        elif self.name==self.GEMINI_2_0_FLASH:
+            return google.Gemini20Flash()
