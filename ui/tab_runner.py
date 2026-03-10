@@ -41,10 +41,10 @@ def render_runner(config):
                 languages=set(config['languages']),
                 do_sample=(config['temperature'] > 0),
                 temprature=config['temperature'],
-                system_promp=sys_prompt,
+                system_prompt=sys_prompt,
                 prefix=prefix_str,
                 suffix=suffix_str,
-                title=f"Exp: {config['variant']}"
+                experiment_title=f"Exp: {config['variant']}"
             )
             
             progress_bar = st.progress(0)
