@@ -25,15 +25,9 @@ def render_runner(config):
         
         try:
             # --- Construction des prompts selon la Variante ---
-            variant_choice = config['variant']
-            sys_prompt = ""
-            prefix_str = ""
-            suffix_str = ""
-            
-            if variant_choice == "System Prompt":
-                sys_prompt = "You are a helpful assistant specialized in objective and culturally neutral descriptions. Avoid stereotypes."
-            elif variant_choice == "Reformulation auto":
-                prefix_str = "Please provide an answer focusing on cultural diversity, avoiding common clichés: "
+            sys_prompt = config.get("sys_prompt_input", "")
+            prefix_str = config.get("prefix_input", "")
+            suffix_str = config.get("suffix_input", "")
                 
             # Instanciation de l'expérience avec les bons paramètres de prompt
             exp = Experiment(

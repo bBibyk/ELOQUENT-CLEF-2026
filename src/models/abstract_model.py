@@ -22,6 +22,6 @@ class AbstractModel(ABC):
     def generate(self, user_input: str) -> str:
         """
         user_input : la donnée brute (ex: une phrase à traduire).
-        La méthode doit combiner prefix + user_input + suffix.
+        La méthode peut combiner prefix + user_input + suffix.
         """
         raise NotImplementedError("La méthode generate doit être implémentée.")

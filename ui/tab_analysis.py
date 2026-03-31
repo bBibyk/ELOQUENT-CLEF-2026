@@ -33,16 +33,21 @@ def render_analysis(current_config):
 
     st.markdown("---")
 
-    # 3. Export (Lot E) format compact sur une ligne
-    st.markdown("**Export Challenge ELOQUENT**")
+    # 3. Export (Lot E)
+    st.markdown("### 📦 Package de Soumission (Challenge)")
+    st.caption("Générez les fichiers requis pour clore votre participation.")
+    
+    st.info("L'exportation de l'archive ZIP complète est encore en cours de développement côté back-end. Merci d'exporter les fichiers indépendamment.")
     
     # MOCK : Données factices pour l'export
     df_mock = pd.DataFrame([{"id": "q1", "prompt": "Test", "answer": "Réponse"}])
     jsonl_data = df_mock.to_json(orient="records", lines=True)
     metadata_json = json.dumps(config_to_export, indent=2)
 
-    col_btn1, col_btn2, _ = st.columns([1, 1, 2])
+    st.download_button("📦 Télécharger l'archive complète (.zip)", data=b"", file_name="archive.zip", disabled=True, use_container_width=True, help="Fonctionnalité d'archivage non développée côté backend.")
+
+    col_btn1, col_btn2 = st.columns(2)
     with col_btn1:
-        st.download_button("Télécharger Réponses (.jsonl)", data=jsonl_data, file_name=f"answers_{config_to_export['model']}.jsonl", mime="application/jsonlines", use_container_width=True)
+        st.download_button("📄 Télécharger Réponses (.jsonl)", data=jsonl_data, file_name=f"answers_{config_to_export['model']}.jsonl", mime="application/jsonlines", use_container_width=True)
     with col_btn2:
-        st.download_button("Télécharger Métadonnées (.json)", data=metadata_json, file_name="metadata.json", mime="application/json", use_container_width=True)
+        st.download_button("🛠️ Télécharger Métadonnées (.json)", data=metadata_json, file_name="metadata.json", mime="application/json", use_container_width=True)

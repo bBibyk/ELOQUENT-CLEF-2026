@@ -16,6 +16,20 @@ def render_sidebar():
         def get_default(key, default_val):
             return st.session_state.get(f"config_{key}", default_val)
         
+        # 0. Rejouer une session
+        with st.expander("Rejouer une configuration - In development", expanded=False):
+            st.info("Cette fonctionnalité n'est pas encore développée côté back-end.")
+            st.caption("Elle permettra de restaurer les paramètres exacts d'une ancienne expérience.")
+            
+            replay_mode = st.radio("Méthode de chargement", ["Depuis l'ordinateur (Upload)", "Depuis l'historique local"])
+            
+            if replay_mode == "Depuis l'ordinateur (Upload)":
+                st.file_uploader("Fichier de configuration (.json, .jsonl)", type=["json", "jsonl"], disabled=True)
+            else:
+                st.selectbox("Expériences enregistrées", ["gemini_2.5_flash_20260313_182005", "mistral_nemo_20260312_091500"], disabled=True)
+                
+            st.button("Charger les paramètres", disabled=True, use_container_width=True)
+
         # 1. Sélection du Modèle (Directement depuis l'Enum)
         with st.expander("Modèle", expanded=True):
             model_options = list(Model)
@@ -41,24 +55,21 @@ def render_sidebar():
         # 2. Données et Langues
         with st.expander("Données et Langues", expanded=True):
             ds_def = get_default("dataset_type", "unspecific")
-            dataset_type = st.radio("Dataset", ["unspecific (Diversité)", "specific (Robustesse)"], index=0 if "unspecific" in ds_def else 1)
+            dataset_type = st.radio("Type de Dataset", ["unspecific (Diversité)", "specific (Robustesse)"], index=0 if "unspecific" in ds_def else 1)
             
             all_langs = list(LanguageCode)
-            if st.button("Toutes les langues"):
-                st.session_state["config_languages"] = [l.name for l in all_langs]
-                
-            # Les 5 langues par défaut pour démarrer (en Enums)
-            default_langs = [LanguageCode.FRENCH, LanguageCode.ENGLISH, LanguageCode.SPANISH, LanguageCode.GERMAN, LanguageCode.ITALIAN]
-            saved_lang_names = get_default("languages", [l.name for l in default_langs])
-            
-            # Reconstruction de la liste d'Enums sélectionnée par défaut
-            default_selection = [l for l in all_langs if l.name in saved_lang_names]
-            
+
+            # Initialisation par défaut si vide
+            if "config_languages_input" not in st.session_state:
+                # Retrouver les valeurs sauvegardées s'il y en a, sinon les 5 par défaut
+                default_names = get_default("languages", ["FRENCH", "ENGLISH", "SPANISH", "GERMAN", "ITALIAN"])
+                st.session_state["config_languages_input"] = [l for l in all_langs if l.name in default_names]
+
             selected_langs = st.multiselect(
-                "Langues", 
+                "Langues (5 minimum)", 
                 options=all_langs,
-                format_func=lambda x: f"{x.name.capitalize().replace('_', ' ')} ({x.value})",
-                default=default_selection
+                format_func=lambda x: f"{x.name.capitalize()} ({x.value})",
+                key="config_languages_input"
             )
             
             if len(selected_langs) < 5:
@@ -94,18 +105,41 @@ def render_sidebar():
         
         # 4. Variantes 
         with st.expander("Stratégie (Variantes)", expanded=True):
-            var_def = get_default("variant", "Baseline (Vanilla)")
-            var_options = ["Baseline (Vanilla)", "System Prompt", "Reformulation auto"]
-            var_idx = var_options.index(var_def) if var_def in var_options else 0
-            variant = st.selectbox("Expérience", var_options, index=var_idx)
+            var_options = ["Vanilla", "Prompt Engineering", "System Engineering"]
+            
+            # Initialisation robuste pour le sélecteur
+            if "config_variant_state" not in st.session_state:
+                var_def = get_default("variant", "Vanilla")
+                st.session_state["config_variant_state"] = var_def if var_def in var_options else "Vanilla"
+            
+            variant = st.selectbox(
+                "Expérience", 
+                var_options, 
+                key="config_variant_state",
+                help="""
+**Vanilla** : Le modèle répond naturellement sans modification de consigne.
+**Prompt Engineering** : Ajoute un préfixe et/ou suffixe à chaque message utilisateur pour forcer un aspect (ex: neutralité).
+**System Engineering** : Définit un 'System Prompt' global qui conditionne le comportement général du modèle.
+"""
+            )
+            
+            sys_prompt_input = ""
+            prefix_input = ""
+            suffix_input = ""
+            
+            if variant == "System Engineering":
+                sys_prompt_input = st.text_area("System Prompt", value="Exemple : Tu es un assistant utile spécialisé dans les descriptions objectives et culturellement neutres. Évite les stéréotypes.", height=250, help="Astuce: Si vous êtes sur un petit écran, vous pouvez agrandir verticalement cette zone en tirant le coin inférieur droit.")
+            elif variant == "Prompt Engineering":
+                prefix_input = st.text_area("Préfixe (avant la question)", value="Exemple : Veuillez fournir une réponse en vous concentrant sur la diversité culturelle, en évitant les clichés courants : ", height=200, help="Astuce: Tirez sur le coin en bas à droite pour agrandir la zone.")
+                suffix_input = st.text_area("Suffixe (après la question)", value="", height=150)
         
-        # 4. Hyperparamètres
-        with st.expander("Paramètres", expanded=False):
-            temperature = st.slider("Température", 0.0, 2.0, get_default("temperature", 0.0), 0.1)
-            top_p = st.slider("Top-p", 0.0, 1.0, get_default("top_p", 1.0), 0.05)
-            max_tokens = st.number_input("Max Tokens", 10, 2048, get_default("max_tokens", 500), step=50)
+        # 4. Paramètres de Modèle
+        with st.expander("Paramètres de Modèle", expanded=False):
+            temperature = st.slider("Température", 0.0, 2.0, get_default("temperature", 0.0), 0.1, help="Gère la créativité. 0 = déterministe, 2 = très créatif.")
+            top_p = st.slider("Top-p", 0.0, 1.0, get_default("top_p", 1.0), 0.05, help="Contrôle la diversité du vocabulaire.")
+            max_tokens = st.number_input("Longueur (Max Tokens)", 10, 2048, get_default("max_tokens", 500), step=50, help="Le nombre maximum de tokens générés dans la réponse.")
             seed_val = get_default("seed", 42)
-            seed = st.number_input("Déterminisme (Seed)", 0, 100000, seed_val if seed_val is not None else 42)
+            seed = st.number_input("Déterminisme (Seed)", 0, 100000, seed_val if seed_val is not None else 42, help="Fixer une graine (seed) permet de reproduire exactement les mêmes résultats avec la même température.")
 
         # Retourne des objets typés propres (Enum Model, List[Enum LanguageCode])
         config_dict = {
@@ -113,6 +147,9 @@ def render_sidebar():
             "dataset_type": dataset_type.split(" ")[0],
             "languages": selected_langs,
             "variant": variant,
+            "sys_prompt_input": sys_prompt_input,
+            "prefix_input": prefix_input,
+            "suffix_input": suffix_input,
             "temperature": temperature,
             "top_p": top_p,
             "max_tokens": max_tokens,
