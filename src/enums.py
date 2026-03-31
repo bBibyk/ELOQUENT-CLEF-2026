@@ -46,6 +46,7 @@ class LanguageCode(BaseEnum):
     TELUGU = "te"
 
 class Model(BaseEnum):
+    MISTRAL_LARGE = "Mistral Large"
     MISTRAL_NEMO = "Mistral NeMo"
     GEMINI_2_5_FLASH = "Gemini 2.5 Flash"
     # GEMINI_2_5_PRO = "Gemini 2.5 Pro"
@@ -69,6 +70,7 @@ class Model(BaseEnum):
     # GEMINI_3_1_PRO_PREVIEW = "Gemini 3.1 Pro Preview"
     # GEMINI_3_1_PRO_PREVIEW_CUSTOMTOOLS = "Gemini 3.1 Pro Preview Customtools"
     GEMINI_3_1_FLASH_LITE_PREVIEW = "Gemini 3.1 Flash Lite Preview"
+    LLAMA_3_1_8B = "Llama 3.1 (8B)"
     LAMA_4_SCOUT = "Lama 4 Scout"
     KIMI_K2 = "Kimi K2"
     DEEPSEEK_CHAT = "DeepSeek Chat"
@@ -76,8 +78,12 @@ class Model(BaseEnum):
     def to_model_class(self) -> type[abstract_model.AbstractModel]:
         if self.name=="MISTRAL_NEMO":
             return mistral_ai.MistralNeMo
+        elif self.name=="MISTRAL_LARGE":
+            return mistral_ai.MistralLarge
         elif self.name=="GEMINI_2_5_FLASH":
             return google.Gemini25Flash
+        elif self.name=="GEMINI_1_5_FLASH":
+            return google.Gemini15Flash
         elif self.name=="GEMINI_2_5_PRO":
             return google.Gemini25Pro
         elif self.name=="GEMINI_2_0_FLASH":
@@ -122,6 +128,8 @@ class Model(BaseEnum):
             return google.Gemini31FlashLitePreview
         elif self.name=="LAMA_4_SCOUT":
             return groq.Lama4Scout
+        elif self.name=="LLAMA_3_1_8B":
+            return groq.Llama31_8B
         elif self.name=="KIMI_K2":
             return groq.KimiK2
         elif self.name=="DEEPSEEK_CHAT":

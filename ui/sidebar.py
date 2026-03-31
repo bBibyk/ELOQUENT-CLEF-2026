@@ -63,8 +63,36 @@ def render_sidebar():
             
             if len(selected_langs) < 5:
                 st.warning("La baseline exige au moins 5 langues.")
+                
+        # 3. Plage de données
+        with st.expander("Plage de données (Lignes)", expanded=True):
+            dataset_code_str = dataset_type.split(" ")[0]
+            max_lines = 1000
+            try:
+                file_path = f"data/input/en_{dataset_code_str}.jsonl"
+                if os.path.exists(file_path):
+                    with open(file_path, 'r', encoding='utf-8') as f:
+                        max_lines = sum(1 for _ in f)
+            except Exception:
+                pass
+                
+            start_def = get_default("start_line", 0)
+            end_def = get_default("end_line", max_lines)
+            
+            if start_def > max_lines: start_def = 0
+            if end_def > max_lines: end_def = max_lines
+            if start_def > end_def: start_def = 0
+            
+            col1, col2 = st.columns(2)
+            with col1:
+                start_line = st.number_input("Début", min_value=0, max_value=max_lines, value=start_def, step=1)
+            with col2:
+                end_line = st.number_input("Fin", min_value=0, max_value=max_lines, value=end_def, step=1)
+                
+            if start_line > end_line:
+                st.warning("Attention : l'intervalle est invalide (Début > Fin).")
         
-        # 3. Variantes 
+        # 4. Variantes 
         with st.expander("Stratégie (Variantes)", expanded=True):
             var_def = get_default("variant", "Baseline (Vanilla)")
             var_options = ["Baseline (Vanilla)", "System Prompt", "Reformulation auto"]
@@ -88,7 +116,9 @@ def render_sidebar():
             "temperature": temperature,
             "top_p": top_p,
             "max_tokens": max_tokens,
-            "seed": seed
+            "seed": seed,
+            "start_line": start_line,
+            "end_line": end_line
         }
         
         # Sauvegarde en session (uniquement les str/int pour sérialisation interne)

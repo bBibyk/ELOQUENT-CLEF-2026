@@ -34,3 +34,4 @@ class GroqBaseModel(AbstractModel):
 
 class Lama4Scout(GroqBaseModel): model_name = "meta-llama/llama-4-scout-17b-16e-instruct"
 class KimiK2(GroqBaseModel): model_name = "moonshotai/kimi-k2-instruct-0905"
+class Llama31_8B(GroqBaseModel): model_name = "llama-3.1-8b-instant"

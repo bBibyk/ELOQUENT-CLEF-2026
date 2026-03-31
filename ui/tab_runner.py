@@ -45,20 +45,32 @@ def render_runner(config):
                 prefix=prefix_str,
                 suffix=suffix_str,
                 experiment_title=f"Exp: {config['variant']}",
-                specific=config['dataset_type'] == 'specific'
+                specific=config['dataset_type'] == 'specific',
+                start_line=config['start_line'],
+                end_line=config['end_line']
             )
             
+            total_tasks = (config['end_line'] - config['start_line']) * len(config['languages'])
+            
             progress_bar = st.progress(0)
+            status_text = st.empty()
             log_box = st.empty()
-            logs = "Démarrage du run...\n"
+            log_box.info("Démarrage du run...")
+            
             
             # Boucle sur le générateur de résultats intermédiaires
-            for i, res in enumerate(exp.run()):
-                logs += f"{res}\n"
-                log_box.text_area("Console de Logs", logs, height=150)
+            for i, (prompt, res) in enumerate(exp.run()):
+                with log_box.container():
+                    st.markdown("**Requête actuelle :**")
+                    st.info(prompt)
+                    st.markdown("**Réponse du modèle :**")
+                    st.success(res)
+                
                 # Mise à jour arbitraire de la barre pour cet exemple mocké
-                progress_val = min((i + 1) / 10, 1.0)
+                progress_val = min((i + 1) / max(1, total_tasks), 1.0)
                 progress_bar.progress(progress_val)
+                remaining = total_tasks - (i + 1)
+                status_text.markdown(f"**Progression** : {i+1} / {total_tasks} lignes traitées | **Restantes** : {remaining}")
                 
             progress_bar.progress(1.0)
             st.success("Exécution terminée ! Les résultats sont dans l'onglet Analyse & Export.")

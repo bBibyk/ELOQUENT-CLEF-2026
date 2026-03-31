@@ -33,3 +33,4 @@ class MistralBaseModel(AbstractModel):
         return _generate(self.model_client, self.model_name, user_input, self.system_prompt, self.prefix, self.suffix, self.temperature)
 
 class MistralNeMo(MistralBaseModel): model_name = "open-mistral-nemo"
+class MistralLarge(MistralBaseModel): model_name = "mistral-large-latest"
