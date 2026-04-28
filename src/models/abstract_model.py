@@ -7,12 +7,14 @@ class AbstractModel(ABC):
                  prefix: str = "", 
                  suffix: str = "", 
                  do_sample: bool = False, 
-                 temperature: float = 0.0):
+                 temperature: float = 0.0,
+                 max_new_tokens: int = 200):
         self.system_prompt = system_prompt
         self.prefix = prefix
         self.suffix = suffix
         self.do_sample = do_sample
         self.temperature = temperature
+        self.max_new_tokens = max_new_tokens
         self.model_client = None
 
     def get_model_name(self) -> str:

@@ -7,7 +7,7 @@ def _get_model(model_name: str, system_prompt: str):
     client = OpenAI(api_key=key, base_url="https://api.deepseek.com")
     return client
 
-def _generate(client, model_name: str, user_input: str, system_prompt: str, prefix: str, suffix: str, temperature: float) -> str:
+def _generate(client, model_name: str, user_input: str, system_prompt: str, prefix: str, suffix: str, temperature: float, max_new_tokens: int) -> str:
     prompt = f"{prefix}\n{user_input}\n{suffix}"
     messages = []
     if system_prompt:
@@ -17,7 +17,8 @@ def _generate(client, model_name: str, user_input: str, system_prompt: str, pref
     response = client.chat.completions.create(
         model=model_name,
         messages=messages,
-        temperature=temperature
+        temperature=temperature,
+        max_tokens=max_new_tokens
     )
     return response.choices[0].message.content
 
@@ -30,6 +31,6 @@ class DeepSeekBaseModel(AbstractModel):
         self.model_client = _get_model(self.model_name, self.system_prompt)
     
     def generate(self, user_input: str) -> str:
-        return _generate(self.model_client, self.model_name, user_input, self.system_prompt, self.prefix, self.suffix, self.temperature)
+        return _generate(self.model_client, self.model_name, user_input, self.system_prompt, self.prefix, self.suffix, self.temperature, self.max_new_tokens)
 
 class DeepSeekChat(DeepSeekBaseModel): model_name = "deepseek-chat"

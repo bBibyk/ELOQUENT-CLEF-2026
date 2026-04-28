@@ -43,6 +43,7 @@ class LanguageCode(BaseEnum):
     SLOVAK = "sk"
     SWEDISH = "sv"
     TAMIL = "ta"
+    UKRAINIAN = "ua"
     TELUGU = "te"
 
 class Model(BaseEnum):

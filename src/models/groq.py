@@ -7,7 +7,7 @@ def _get_model(model_name: str, system_prompt: str):
     client = Groq(api_key=key)
     return client
 
-def _generate(client, model_name: str, user_input: str, system_prompt: str, prefix: str, suffix: str, temperature: float) -> str:
+def _generate(client, model_name: str, user_input: str, system_prompt: str, prefix: str, suffix: str, temperature: float, max_new_tokens: int) -> str:
     prompt = f"{prefix}\n{user_input}\n{suffix}"
     messages = []
     if system_prompt:
@@ -17,7 +17,8 @@ def _generate(client, model_name: str, user_input: str, system_prompt: str, pref
     response = client.chat.completions.create(
         model=model_name,
         messages=messages,
-        temperature=temperature
+        temperature=temperature,
+        max_tokens=max_new_tokens
     )
     return response.choices[0].message.content
 
@@ -30,7 +31,7 @@ class GroqBaseModel(AbstractModel):
         self.model_client = _get_model(self.model_name, self.system_prompt)
     
     def generate(self, user_input: str) -> str:
-        return _generate(self.model_client, self.model_name, user_input, self.system_prompt, self.prefix, self.suffix, self.temperature)
+        return _generate(self.model_client, self.model_name, user_input, self.system_prompt, self.prefix, self.suffix, self.temperature, self.max_new_tokens)
 
 class Lama4Scout(GroqBaseModel): model_name = "meta-llama/llama-4-scout-17b-16e-instruct"
 class KimiK2(GroqBaseModel): model_name = "moonshotai/kimi-k2-instruct-0905"

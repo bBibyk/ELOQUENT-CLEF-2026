@@ -33,7 +33,7 @@ def render_runner(config):
             exp = Experiment(
                 model_choice=config['model'],
                 languages=set(config['languages']),
-                do_sample=(config['temperature'] > 0),
+                do_sample=config['do_sample'],
                 temprature=config['temperature'],
                 system_prompt=sys_prompt,
                 prefix=prefix_str,
@@ -41,10 +41,11 @@ def render_runner(config):
                 experiment_title=f"Exp: {config['variant']}",
                 specific=config['dataset_type'] == 'specific',
                 start_line=config['start_line'],
-                end_line=config['end_line']
+                end_line=config['end_line'],
+                max_new_tokens=config['max_new_tokens']
             )
             
-            total_tasks = (config['end_line'] - config['start_line']) * len(config['languages'])
+            total_tasks = (config['end_line'] - config['start_line'] + 1) * len(config['languages'])
             
             progress_bar = st.progress(0)
             status_text = st.empty()
@@ -67,7 +68,7 @@ def render_runner(config):
                 status_text.markdown(f"**Progression** : {i+1} / {total_tasks} lignes traitées | **Restantes** : {remaining}")
                 
             progress_bar.progress(1.0)
-            st.success("Exécution terminée ! Les résultats sont dans l'onglet Analyse & Export.")
+            st.success("Exécution terminée ! Les résultats ont été sauvegardés.")
             
             st.session_state['run_done'] = True
             

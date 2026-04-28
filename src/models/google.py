@@ -10,9 +10,9 @@ def _get_model(model_name: str, system_prompt: str):
     else:
         return genai.GenerativeModel(model_name=model_name)
 
-def _generate(model, user_input: str, prefix: str, suffix: str, temperature: float) -> str:
+def _generate(model, user_input: str, prefix: str, suffix: str, temperature: float, max_new_tokens: int) -> str:
     prompt = f"{prefix}\n{user_input}\n{suffix}"
-    generation_config = genai.types.GenerationConfig(temperature=temperature)
+    generation_config = genai.types.GenerationConfig(temperature=temperature, max_output_tokens=max_new_tokens)
     response = model.generate_content(prompt, generation_config=generation_config)
     return response.text
 
@@ -25,7 +25,7 @@ class GoogleBaseModel(AbstractModel):
         self.model_client = _get_model(self.model_name, self.system_prompt)
     
     def generate(self, user_input: str) -> str:
-        return _generate(self.model_client, user_input, self.prefix, self.suffix, self.temperature)
+        return _generate(self.model_client, user_input, self.prefix, self.suffix, self.temperature, self.max_new_tokens)
 
 class Gemini25Flash(GoogleBaseModel): model_name = "gemini-2.5-flash"
 class Gemini25Pro(GoogleBaseModel): model_name = "gemini-2.5-pro"
