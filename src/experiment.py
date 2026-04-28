@@ -89,11 +89,11 @@ class Experiment:
             )
             self._save_experiment_footprint()
 
-            ids = df["id"].astype(int)
+            ids = len(df)
             if self._end_line is not None:
-                df_subset = df[(ids >= self._start_line) & (ids <= self._end_line)]
+                df_subset = df.iloc[self._start_line:self._end_line+1]
             else:
-                df_subset = df[ids >= self._start_line]
+                df_subset = df.iloc[self._start_line:]
 
             for _, row in df_subset.iterrows():
                 row_id = row["id"]
