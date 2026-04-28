@@ -1,17 +1,21 @@
-# ELOQUENT @ CLEF 2026
+Voici ton texte avec les accents correctement ajoutés :
 
-Application multi-LLM realisee dans le cadre du projet MIAGE M2 Big Data Analytics autour du challenge ELOQUENT "Cultural Robustness & Diversity".
+---
+
+# ÉLOQUENT @ CLEF 2026
+
+Application multi-LLM réalisée dans le cadre du projet MIAGE M2 Big Data Analytics autour du challenge ÉLOQUENT "Cultural Robustness & Diversity".
 
 L'application permet de :
 
-- lancer des experimentations sur les jeux de donnees JSONL du challenge ;
-- comparer plusieurs familles de modeles ;
-- tester plusieurs strategies de prompting ;
-- generer des sorties JSONL et des metadonnees de run.
+* lancer des expérimentations sur les jeux de données JSONL du challenge ;
+* comparer plusieurs familles de modèles ;
+* tester plusieurs stratégies de prompting ;
+* générer des sorties JSONL et des métadonnées de run.
 
-Le point d'entree principal du projet est l'interface Streamlit : `app.py`.
+Le point d'entrée principal du projet est l'interface Streamlit : `app.py`.
 
-## Demarrage rapide
+## Démarrage rapide
 
 ### Windows PowerShell
 
@@ -35,32 +39,32 @@ cp .env.example .env
 ./.venv/bin/python -m streamlit run app.py
 ```
 
-Une fois le serveur lance, ouvrez `http://localhost:8501` dans votre navigateur.
+Une fois le serveur lancé, ouvrez `http://localhost:8501` dans votre navigateur.
 
 ## Installation from scratch
 
-### 1. Prerequis
+### 1. Prérequis
 
-- Python installe sur la machine
-- Une connexion Internet pour appeler les API des modeles
-- Au moins une cle d'API active selon le provider choisi
+* Python installé sur la machine
+* Une connexion Internet pour appeler les API des modèles
+* Au moins une clé d'API active selon le provider choisi
 
-Python 3.10+ est recommande.
+Python 3.10+ est recommandé.
 
-### 2. Recuperer le projet
+### 2. Récupérer le projet
 
-Si le depot n'est pas encore present :
+Si le dépôt n'est pas encore présent :
 
 ```bash
 git clone <url-du-depot>
 cd ELOQUENT-CLEF-2026
 ```
 
-Si le depot est deja ouvert dans votre IDE, placez-vous simplement dans le dossier `ELOQUENT-CLEF-2026`.
+Si le dépôt est déjà ouvert dans votre IDE, placez-vous simplement dans le dossier `ELOQUENT-CLEF-2026`.
 
-### 3. Creer un environnement virtuel
+### 3. Créer un environnement virtuel
 
-L'environnement virtuel est fortement recommande pour isoler les dependances du projet.
+L'environnement virtuel est fortement recommandé pour isoler les dépendances du projet.
 
 Windows PowerShell :
 
@@ -74,7 +78,7 @@ macOS / Linux :
 python3 -m venv .venv
 ```
 
-### 4. Installer les dependances
+### 4. Installer les dépendances
 
 Windows PowerShell :
 
@@ -90,9 +94,9 @@ macOS / Linux :
 ./.venv/bin/python -m pip install -r requirements.txt
 ```
 
-## Configuration des cles API
+## Configuration des clés API
 
-Le projet utilise actuellement des providers distants. Il faut donc renseigner une ou plusieurs cles d'API dans un fichier `.env`.
+Le projet utilise actuellement des providers distants. Il faut donc renseigner une ou plusieurs clés d'API dans un fichier `.env`.
 
 1. Dupliquez le fichier d'exemple :
 
@@ -108,14 +112,14 @@ macOS / Linux :
 cp .env.example .env
 ```
 
-2. Ouvrez `.env` et renseignez uniquement les variables utiles pour les modeles que vous souhaitez utiliser.
+2. Ouvrez `.env` et renseignez uniquement les variables utiles pour les modèles que vous souhaitez utiliser.
 
 Variables reconnues par le code :
 
-- `GOOGLE_API_KEY` pour les modeles Gemini / Gemma exposes via Google
-- `MISTRAL_API_KEY` pour les modeles Mistral
-- `GROQ_API_KEY` pour les modeles servis via Groq
-- `DEEPSEEK_API_KEY` pour `DeepSeek Chat`
+* `GOOGLE_API_KEY` pour les modèles Gemini / Gemma exposés via Google
+* `MISTRAL_API_KEY` pour les modèles Mistral
+* `GROQ_API_KEY` pour les modèles servis via Groq
+* `DEEPSEEK_API_KEY` pour `DeepSeek Chat`
 
 Exemple minimal :
 
@@ -128,9 +132,9 @@ DEEPSEEK_API_KEY=
 
 Important :
 
-- il suffit d'avoir la cle correspondant au modele selectionne dans l'interface ;
-- sans cle valide, le lancement de l'interface fonctionne, mais l'execution du run echouera au moment d'interroger le provider ;
-- dans cette version du depot, les providers implementes sont API-first. Un provider local open-source via endpoint local n'est pas encore branche dans ce code.
+* il suffit d'avoir la clé correspondant au modèle sélectionné dans l'interface ;
+* sans clé valide, le lancement de l'interface fonctionne, mais l'exécution du run échouera au moment d'interroger le provider ;
+* dans cette version du dépôt, les providers implémentés sont API-first. Un provider local open-source via endpoint local n'est pas encore branché dans ce code.
 
 ## Lancer l'application
 
@@ -154,33 +158,33 @@ Si la commande `streamlit run app.py` n'est pas reconnue, gardez la forme `pytho
 
 Dans l'interface :
 
-1. choisissez un modele ;
+1. choisissez un modèle ;
 2. choisissez le type de dataset : `specific` ou `unspecific` ;
-3. selectionnez les langues ;
+3. sélectionnez les langues ;
 4. laissez `Vanilla`, ou activez une variante de prompt ;
-5. lancez l'experimentation.
+5. lancez l'expérimentation.
 
-Les jeux de donnees d'entree sont deja presents dans `data/input/`.
+Les jeux de données d'entrée sont déjà présents dans `data/input/`.
 
-Les sorties sont ecrites automatiquement dans `data/output/<model>_<timestamp>/` avec :
+Les sorties sont écrites automatiquement dans `data/output/<model>_<timestamp>/` avec :
 
-- un ou plusieurs fichiers JSONL contenant les reponses generees ;
-- un fichier `submission_metadata.json` qui capture les parametres du run.
+* un ou plusieurs fichiers JSONL contenant les réponses générées ;
+* un fichier `submission_metadata.json` qui capture les paramètres du run.
 
 ## Reproduire une baseline conforme au sujet
 
 Pour une baseline simple conforme aux attentes du projet :
 
-- selectionnez `Vanilla` ;
-- gardez une temperature a `0.0` pour un comportement deterministe ;
-- ne renseignez ni `System Prompt`, ni prefixe, ni suffixe ;
-- selectionnez au moins 5 langues ;
-- choisissez la plage de lignes a traiter ;
-- lancez le run.
+* sélectionnez `Vanilla` ;
+* gardez une température à `0.0` pour un comportement déterministe ;
+* ne renseignez ni `System Prompt`, ni préfixe, ni suffixe ;
+* sélectionnez au moins 5 langues ;
+* choisissez la plage de lignes à traiter ;
+* lancez le run.
 
-Cette configuration correspond a l'idee d'un run sans reformulation ni prompt engineering, avec une session independante par question.
+Cette configuration correspond à l'idée d'un run sans reformulation ni prompt engineering, avec une session indépendante par question.
 
-## Structure utile du depot
+## Structure utile du dépôt
 
 ```text
 ELOQUENT-CLEF-2026/
@@ -194,17 +198,11 @@ ELOQUENT-CLEF-2026/
 `- IDEES_VARIANTES_BIAIS_CULTURELS.md
 ```
 
-Note : le dossier `configs/` existe deja, mais l'execution actuelle passe principalement par l'interface Streamlit et les metadonnees sauvegardees dans `data/output/`.
+Note : le dossier `configs/` existe déjà, mais l'exécution actuelle passe principalement par l'interface Streamlit et les métadonnées sauvegardées dans `data/output/`.
 
-## Depannage rapide
+## Dépannage rapide
 
-- `ModuleNotFoundError` : relancez l'installation avec `pip install -r requirements.txt`.
-- Erreur de provider ou quota : verifiez la cle d'API correspondant au modele choisi.
-- Rien n'apparait dans `data/output/` : le dossier n'est cree qu'au moment du lancement effectif d'un run.
-- L'onglet export reste partiellement mocke : l'interface d'analyse/export est encore en cours de finalisation cote backend.
-
-## Document complementaire
-
-Un document de travail dedie aux variantes susceptibles d'introduire des biais culturels est disponible ici :
-
-- [IDEES_VARIANTES_BIAIS_CULTURELS.md](./IDEES_VARIANTES_BIAIS_CULTURELS.md)
+* `ModuleNotFoundError` : relancez l'installation avec `pip install -r requirements.txt`.
+* Erreur de provider ou quota : vérifiez la clé d'API correspondant au modèle choisi.
+* Rien n'apparaît dans `data/output/` : le dossier n'est créé qu'au moment du lancement effectif d'un run.
+* L'onglet export reste partiellement mocké : l'interface d'analyse/export est encore en cours de finalisation côté backend.
