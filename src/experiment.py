@@ -78,18 +78,16 @@ class Experiment:
 
     def run(self):
         """
-        Générateur qui produit les résultats intermédiaires
+        Générateur qui produit les résultats intermédiaires avec gestion des limites API.
         """
-        speceficity = "specific"
-        if not self._specific:
-            speceficity = "un" + speceficity
+        speceficity = "specific" if self._specific else "unspecific"
+        
         for language in self._languages:
             df = pd.read_json(
                 f"data/input/{language.value}_{speceficity}.jsonl", lines=True
             )
             self._save_experiment_footprint()
 
-            ids = len(df)
             if self._end_line is not None:
                 df_subset = df.iloc[self._start_line:self._end_line+1]
             else:
@@ -98,7 +96,23 @@ class Experiment:
             for _, row in df_subset.iterrows():
                 row_id = row["id"]
                 prompt_text = row["prompt"]
-                result = self._model.generate(prompt_text)
+                
+                # --- Retry Logic Starts Here ---
+                result = None
+                wait_time = 1.0  # Start with 1 second
+                max_wait = 64.0  # Maximum wait time between retries
+                
+                while result is None:
+                    try:
+                        result = self._model.generate(prompt_text)
+                    except Exception as e:
+                        # Logic: If it's a rate limit, wait and try again
+                        # You can check 'if "rate limit" in str(e).lower():' if needed
+                        print(f"Rate limit or error encountered: {e}. Retrying in {wait_time}s...")
+                        time.sleep(wait_time)
+                        wait_time = min(wait_time * 2, max_wait) 
+                # --- Retry Logic Ends Here ---
+
                 self._result_df.loc[row_id] = [row_id, prompt_text, result]
                 self._result_df.to_json(
                     f"{self._output_dir}/{language.value}_{speceficity}.jsonl",
@@ -106,6 +120,8 @@ class Experiment:
                     lines=True,
                     force_ascii=False,
                 )
+                
+                # Small polite delay for standard pacing
                 time.sleep(0.5)
                 yield prompt_text, result
 
