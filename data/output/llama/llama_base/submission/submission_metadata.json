@@ -2,9 +2,9 @@
     "team": "Master MIAGE Toulouse",
     "system": "eloquent-system-miage",
     "model": "llama-3.1-(8B)",
-    "submissionid": "llama-baseline",
+    "submissionid": "llama-baseline-nat",
     "date": "2026-04-28",
-    "label": "eloquent-2026-cultural",
+    "label": "master-miage-toulouse-mtmb",
     "languages": [
         "en", "es", "fr", "ta", "ua"
     ],
