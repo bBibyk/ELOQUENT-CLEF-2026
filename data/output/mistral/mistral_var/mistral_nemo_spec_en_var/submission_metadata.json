@@ -1,0 +1,22 @@
+{
+    "team": "TtlySpicy",
+    "system": "eloquent-system",
+    "model": "Mistral NeMo",
+    "submissionid": "Specific-EN | MistralNemo | SysEng",
+    "date": "2026-05-06",
+    "label": "eloquent-2026-cultural",
+    "languages": [
+        "en"
+    ],
+    "modifications": {
+        "system_prompt": "You are of American nationality.",
+        "prompt_prefix_english": "",
+        "prompt_suffix_english": "",
+        "generation_params": {
+            "do_sample": true,
+            "temperature": 0.7,
+            "max_new_tokens": 200
+        },
+        "notes": "Experiment specific: True. Title: Specific-EN | MistralNemo | SysEng"
+    }
+}

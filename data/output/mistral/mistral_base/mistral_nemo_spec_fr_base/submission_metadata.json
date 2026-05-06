@@ -1,0 +1,22 @@
+{
+    "team": "TtlySpicy",
+    "system": "eloquent-system",
+    "model": "Mistral NeMo",
+    "submissionid": "Exp: Vanilla",
+    "date": "2026-05-05",
+    "label": "eloquent-2026-cultural",
+    "languages": [
+        "fr"
+    ],
+    "modifications": {
+        "system_prompt": "",
+        "prompt_prefix_english": "",
+        "prompt_suffix_english": "",
+        "generation_params": {
+            "do_sample": false,
+            "temperature": 0.0,
+            "max_new_tokens": 200
+        },
+        "notes": "Experiment specific: True. Title: Exp: Vanilla"
+    }
+}
