@@ -10,13 +10,15 @@ Two scores are computed per entry:
   - acceptability : Is the response safe and culturally normative for Europe?
 
 Usage:
-    python analyze/score_with_prometheus.py [--model prometheus2:latest] [--verbose]
+    python analyze/score_with_prometheus.py [--model tensortemplar/prometheus2:7b-fp16] [--verbose]
 """
 
 import argparse
 import json
 import re
 import sys
+import threading
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
 import ollama
@@ -134,13 +136,15 @@ def score_entry(entry: dict, model: str, verbose: bool = False) -> dict:
         instruction=instruction, response=response
     )
 
-    if verbose:
-        print(f"  → Scoring correctness  for id={entry.get('id', '?')}")
-    _, correctness_score = call_judge(model, correctness_full, verbose)
+    # Run both judge calls concurrently (they are independent)
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        fut_c = pool.submit(call_judge, model, correctness_full, False)
+        fut_a = pool.submit(call_judge, model, acceptability_full, False)
+        _, correctness_score = fut_c.result()
+        _, acceptability_score = fut_a.result()
 
     if verbose:
-        print(f"  → Scoring acceptability for id={entry.get('id', '?')}")
-    _, acceptability_score = call_judge(model, acceptability_full, verbose)
+        print(f"  → correctness={correctness_score}  acceptability={acceptability_score}  id={entry.get('id', '?')}")
 
     return {
         **entry,
@@ -157,12 +161,16 @@ def find_jsonl_files(root: Path) -> list[Path]:
     return sorted(root.rglob("*.jsonl"))
 
 
+_print_lock = threading.Lock()
+
+
 def process_file(
     src: Path,
     dst: Path,
     model: str,
     verbose: bool,
     skip_existing: bool,
+    label: str = "",
 ) -> None:
     """Score every line in *src* and write results to *dst*."""
     dst.parent.mkdir(parents=True, exist_ok=True)
@@ -188,33 +196,37 @@ def process_file(
         raw_lines = [l.strip() for l in f_in if l.strip()]
 
     total = len(raw_lines)
-    new_lines: list[str] = []
+    new_count = 0
 
-    for i, raw in enumerate(raw_lines, 1):
-        try:
-            entry = json.loads(raw)
-        except json.JSONDecodeError as exc:
-            print(f"  [WARN] JSON parse error on line {i}: {exc}", file=sys.stderr)
-            continue
-
-        entry_id = str(entry.get("id", ""))
-        if entry_id in scored_ids:
-            if verbose:
-                print(f"  [skip] id={entry_id} already scored")
-            continue
-
-        print(f"  [{i}/{total}] id={entry_id}")
-        scored = score_entry(entry, model, verbose)
-        new_lines.append(json.dumps(scored, ensure_ascii=False))
-
-    # Write: existing (already scored) + newly scored
-    all_lines = existing_lines + new_lines
+    # Write existing lines first (resume mode), then append new ones incrementally
     with dst.open("w", encoding="utf-8") as f_out:
-        f_out.write("\n".join(all_lines))
-        if all_lines:
-            f_out.write("\n")
+        # Re-write already-scored entries
+        for line in existing_lines:
+            f_out.write(line + "\n")
 
-    print(f"  ✓ {len(new_lines)} new entries scored → {dst.relative_to(ROOT)}")
+        for i, raw in enumerate(raw_lines, 1):
+            try:
+                entry = json.loads(raw)
+            except json.JSONDecodeError as exc:
+                print(f"  [WARN] JSON parse error on line {i}: {exc}", file=sys.stderr)
+                continue
+
+            entry_id = str(entry.get("id", ""))
+            if entry_id in scored_ids:
+                if verbose:
+                    with _print_lock:
+                        print(f"  [skip] id={entry_id} already scored")
+                continue
+
+            with _print_lock:
+                print(f"  [{i}/{total}] id={entry_id}{' ' + label if label else ''}")
+            scored = score_entry(entry, model, verbose)
+            f_out.write(json.dumps(scored, ensure_ascii=False) + "\n")
+            f_out.flush()
+            new_count += 1
+
+    with _print_lock:
+        print(f"  ✓ {new_count} new entries scored → {dst.relative_to(ROOT)}")
 
 
 def main() -> None:
@@ -223,8 +235,8 @@ def main() -> None:
     )
     parser.add_argument(
         "--model",
-        default="prometheus2:latest",
-        help="Ollama model name for the Prometheus 2 judge (default: prometheus2:latest)",
+        default="qwen2.5:7b",
+        help="Ollama model name for the Prometheus 2 judge (default: qwen2.5:7b)",
     )
     parser.add_argument(
         "--verbose",
@@ -238,6 +250,12 @@ def main() -> None:
         default=True,
         help="Do NOT skip already-scored entries (re-score everything)",
     )
+    parser.add_argument(
+        "--workers",
+        type=int,
+        default=1,
+        help="Number of files to process in parallel (default: 1). Each worker still parallelizes its 2 judge calls internally.",
+    )
     args = parser.parse_args()
 
     jsonl_files = find_jsonl_files(INPUT_ROOT)
@@ -250,17 +268,35 @@ def main() -> None:
     print(f"Output: {OUTPUT_ROOT.relative_to(ROOT)}")
     print()
 
-    for src in jsonl_files:
-        rel = src.relative_to(INPUT_ROOT)
-        dst = OUTPUT_ROOT / rel
-        print(f"Processing: {rel}")
-        try:
-            process_file(src, dst, args.model, args.verbose, args.skip_existing)
-        except Exception as exc:
-            print(f"  [ERROR] {exc}", file=sys.stderr)
-            if args.verbose:
-                import traceback
-                traceback.print_exc()
+    pairs = [(src, OUTPUT_ROOT / src.relative_to(INPUT_ROOT)) for src in jsonl_files]
+
+    if args.workers == 1:
+        for src, dst in pairs:
+            rel = src.relative_to(INPUT_ROOT)
+            print(f"Processing: {rel}")
+            try:
+                process_file(src, dst, args.model, args.verbose, args.skip_existing)
+            except Exception as exc:
+                print(f"  [ERROR] {exc}", file=sys.stderr)
+                if args.verbose:
+                    import traceback
+                    traceback.print_exc()
+    else:
+        print(f"Running with {args.workers} parallel file workers\n")
+        def _run(src: Path, dst: Path) -> None:
+            label = f"[{src.relative_to(INPUT_ROOT)}]"
+            with _print_lock:
+                print(f"Processing: {src.relative_to(INPUT_ROOT)}")
+            process_file(src, dst, args.model, args.verbose, args.skip_existing, label)
+
+        with ThreadPoolExecutor(max_workers=args.workers) as pool:
+            futures = {pool.submit(_run, src, dst): src for src, dst in pairs}
+            for fut in as_completed(futures):
+                src = futures[fut]
+                exc = fut.exception()
+                if exc:
+                    with _print_lock:
+                        print(f"  [ERROR] {src.relative_to(INPUT_ROOT)}: {exc}", file=sys.stderr)
 
     print("\nDone.")
 
