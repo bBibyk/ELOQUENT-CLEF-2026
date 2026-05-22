@@ -1,7 +1,8 @@
-streamlit==1.55.0
-openai==1.55.0
-google-generativeai==0.8.0
-mistralai==2.0.2
+streamlit
+openai
+google-generativeai
+mistralai
 pandas
 python-dotenv
 groq
+ollama
