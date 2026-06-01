@@ -20,36 +20,6 @@ def render_sidebar():
         def get_default(key, default_val):
             return st.session_state.get(f"config_{key}", default_val)
 
-        # 0. Rejouer une session
-        with st.expander("Rejouer une configuration - In development", expanded=False):
-            st.info("Cette fonctionnalité n'est pas encore développée côté back-end.")
-            st.caption(
-                "Elle permettra de restaurer les paramètres exacts d'une ancienne expérience."
-            )
-
-            replay_mode = st.radio(
-                "Méthode de chargement",
-                ["Depuis l'ordinateur (Upload)", "Depuis l'historique local"],
-            )
-
-            if replay_mode == "Depuis l'ordinateur (Upload)":
-                st.file_uploader(
-                    "Fichier de configuration (.json, .jsonl)",
-                    type=["json", "jsonl"],
-                    disabled=True,
-                )
-            else:
-                st.selectbox(
-                    "Expériences enregistrées",
-                    [
-                        "gemini_2.5_flash_20260313_182005",
-                        "mistral_nemo_20260312_091500",
-                    ],
-                    disabled=True,
-                )
-
-            st.button("Charger les paramètres", disabled=True, use_container_width=True)
-
         # 1. Sélection du Modèle (Directement depuis l'Enum)
         with st.expander("Modèle", expanded=True):
             model_options = list(Model)
